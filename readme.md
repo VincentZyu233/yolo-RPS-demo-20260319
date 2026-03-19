@@ -31,6 +31,8 @@ cd yolo-rps-demo
 
 ### 2. 使用 uv 创建虚拟环境
 
+> 💡 推荐使用 [【uv】https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/) 管理 Python 环境
+
 ```bash
 uv venv --python 3.12
 ```
