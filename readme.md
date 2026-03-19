@@ -1,3 +1,5 @@
+![yolo-RPS-demo-20260319](https://socialify.git.ci/VincentZyu233/yolo-RPS-demo-20260319/image?description=1&font=Source+Code+Pro&forks=1&issues=1&language=1&logo=https%3A%2F%2Fimg.icons8.com%2F%3Fsize%3D100%26id%3DOsYb6orOaOVV%26format%3Dpng%26color%3D000000%E2%80%8B&name=1&owner=1&pulls=1&stargazers=1&theme=Auto)
+
 # YOLO Rock-Paper-Scissors Demo
 
 基于 YOLO 的石头剪刀布实时识别演示项目，支持摄像头采集、模型训练和实时检测。
