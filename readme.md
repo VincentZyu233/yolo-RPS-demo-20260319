@@ -69,10 +69,32 @@ uv pip install -r requirements.txt
 cp config.example.yaml config.yaml
 ```
 
-编辑 `config.yaml` 修改配置：
-- `capture_mode`: 采集模式，`camera` 或 `window`
-- `camera_index`: 摄像头索引
-- `model_path`: 模型路径
+> 📄 配置文件模板 [config.example.yaml](config.example.yaml)
+
+```yaml
+# 服务器配置
+host: "0.0.0.0"           # 监听地址，0.0.0.0 表示所有网卡
+port: 60319               # 监听端口
+
+# 视频采集配置
+capture_mode: "camera"    # 采集模式: "camera" 或 "window"
+camera_index: 0           # 摄像头索引 (capture_mode=camera时使用)
+window_hwnd: null         # 窗口句柄 (capture_mode=window时使用)
+
+# 模型配置
+model_source: "pretrained"  # 模型来源: "pretrained"(预训练) 或 "custom"(自定义训练)
+model_path: "models/yolo11-rps-detection.pt"  # 模型路径(相对或绝对路径)
+
+# 代理配置
+use_proxy: false         # 是否使用代理下载模型
+proxy_url: "http://192.168.31.233:7890"        # 代理地址
+
+# 目标检测模型：石头剪刀布识别 (版本 v11, 规格 yolov8n, 迭代 100 次)
+roboflow_dataset: models/rock-paper-scissors.v11-yolov8n-100epochs.yolov11
+
+# 检测框显示配置
+bbox_refresh_interval: 100  # 检测框刷新间隔，单位毫秒，默认100ms (10fps)
+```
 
 ### 5. 运行
 
@@ -130,14 +152,3 @@ yolo-rps-demo/
 - `?tab=capture` - 采集页
 - `?tab=history` - 历史页
 - `?tab=model` - 模型页
-
-## 配置说明
-
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| `host` | 监听地址 | `0.0.0.0` |
-| `port` | 监听端口 | `60319` |
-| `capture_mode` | 采集模式 | `camera` |
-| `camera_index` | 摄像头索引 | `0` |
-| `model_path` | 模型路径 | `models/yolo11-rps-detection.pt` |
-| `bbox_refresh_interval` | 检测框刷新间隔(ms) | `100` |
