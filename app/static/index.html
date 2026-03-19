@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RPS Game</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; overflow: hidden; }
+        body { 
+            background: #1a1a2e; 
+            color: #fff; 
+            font-family: Arial, sans-serif; 
+        }
+        
+        .layout {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border-right: 1px solid #333;
+        }
+        
+        .right-panel {
+            width: 420px;
+            padding: 15px;
+            overflow-y: auto;
+            background: #16213e;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        h1 { color: #e94560; margin: 0 0 15px 0; font-size: 18px; text-align: center; }
+        
+        .model-indicator {
+            background: #0a0a1a;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+        }
+        .model-indicator strong { color: #4ecca3; }
+        
+        .video-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0a0a1a;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        #bboxCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        #detections { 
+            text-align: center;
+            padding: 10px;
+            font-size: 16px;
+            min-height: 40px;
+            background: #0a0a1a;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .panel-section {
+            margin-bottom: 15px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        #collectTab .panel-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        #sessionsTab,
+        #modelsTab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        #sessionsTab .panel-section,
+        #modelsTab .panel-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .section-title {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+        
+        .current-session {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        .current-session strong { color: #4ecca3; }
+        
+        .stats { display: flex; gap: 8px; margin-bottom: 10px; }
+        .stat { 
+            flex: 1; 
+            padding: 8px; 
+            background: #0a0a1a; 
+            border-radius: 5px; 
+            text-align: center;
+        }
+        .stat-value { font-size: 18px; font-weight: bold; }
+        .stat-label { font-size: 10px; color: #666; margin-top: 2px; }
+        .stat.rock .stat-value { color: #e94560; }
+        .stat.paper .stat-value { color: #4ecca3; }
+        .stat.scissors .stat-value { color: #ffd369; }
+        
+        .hotkeys {
+            background: #0a0a1a;
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .key {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            background: #333;
+            border-radius: 4px;
+            margin: 0 3px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .key.rock { background: #e94560; }
+        .key.paper { background: #4ecca3; color: #000; }
+        .key.scissors { background: #ffd369; color: #000; }
+        
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .btn-start { background: #4ecca3; color: #000; }
+        .btn-stop { background: #e94560; color: #fff; }
+        .btn-train { background: #533483; color: #fff; }
+        .btn-new { background: #0f3460; color: #fff; }
+        .btn-secondary { background: #333; color: #fff; }
+        
+        .sessions-list {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .session-card {
+            background: #0a0a1a;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .session-card:hover { border-color: #4a4a6a; }
+        .session-card.selected { border-color: #4ecca3; }
+        
+        .session-card .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .session-card .session-time { font-size: 11px; color: #666; }
+        .session-card .session-total { font-size: 14px; font-weight: bold; color: #4ecca3; }
+        
+        .session-card .session-counts {
+            font-size: 11px;
+            color: #888;
+        }
+        .session-card .session-counts span { margin-right: 10px; }
+        .session-card .session-counts .rock { color: #e94560; }
+        .session-card .session-counts .paper { color: #4ecca3; }
+        .session-card .session-counts .scissors { color: #ffd369; }
+        
+        .train-panel {
+            margin-top: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #0a0a1a;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecca3, #533483);
+            transition: width 0.3s;
+            width: 0%;
+        }
+        .train-status { font-size: 11px; color: #888; }
+        
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .mode-tab {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            background: #0a0a1a;
+            color: #888;
+        }
+        .mode-tab.active { 
+            background: #e94560; 
+            color: #fff;
+        }
+        
+        .model-list {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .model-item {
+            background: #0a0a1a;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .model-item:hover { border-color: #4a4a6a; }
+        .model-item.selected { border-color: #4ecca3; background: #1a3a2a; }
+        .model-item .model-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+        .model-item .model-name { font-size: 12px; color: #fff; }
+        .model-item .model-path { font-size: 10px; color: #666; }
+        .model-item .model-meta { font-size: 10px; color: #555; margin-top: 3px; display: flex; gap: 12px; }
+        .model-item .model-meta .model-time { color: #888; }
+        .model-item .model-meta .model-size { color: #666; }
+        .model-item.selected .model-name { color: #4ecca3; }
+
+        .model-source-tag {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .model-source-tag.pretrained { background: #e94560; color: #fff; }
+        .model-source-tag.default { background: #ffd369; color: #000; }
+        .model-source-tag.local { background: #4ecca3; color: #000; }
+        .model-source-tag.custom { background: #533483; color: #fff; }
+
+        .model-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #333;
+        }
+        .model-action-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            background: #333;
+            color: #ccc;
+            transition: all 0.2s;
+        }
+        .model-action-btn:hover {
+            background: #4a4a6a;
+            color: #fff;
+        }
+        .model-action-btn.open-folder { background: #0f3460; }
+        .model-action-btn.open-folder:hover { background: #1a4a80; }
+        .model-action-btn.copy-path { background: #533483; }
+        .model-action-btn.copy-path:hover { background: #6a4499; }
+        .model-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        .dataset-selector {
+            margin-bottom: 10px;
+        }
+        .dataset-selector select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background: #0a0a1a;
+            color: #fff;
+            font-size: 12px;
+        }
+        .dataset-info {
+            background: #0a0a1a;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        .dataset-info .available { color: #4ecca3; }
+        .dataset-info .unavailable { color: #e94560; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <div class="left-panel">
+            <h1>Rock Paper Scissors</h1>
+            <div class="model-indicator">
+                当前模型: <strong id="currentModelName">加载中...</strong>
+            </div>
+            <div class="video-container">
+                <img id="video" />
+                <canvas id="bboxCanvas"></canvas>
+            </div>
+            <div id="detections">Waiting...</div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="mode-tabs">
+                <button class="mode-tab active" id="tabCollect" onclick="switchTab('collect')">采集</button>
+                <button class="mode-tab" id="tabSessions" onclick="switchTab('sessions')">历史</button>
+                <button class="mode-tab" id="tabModels" onclick="switchTab('models')">模型</button>
+            </div>
+            
+            <div id="collectTab">
+                <div class="panel-section">
+                    <div class="current-session">
+                        Session: <strong id="currentSessionName">未选择</strong>
+                    </div>
+                    
+                    <div class="stats">
+                        <div class="stat rock">
+                            <div class="stat-value" id="statRock">0</div>
+                            <div class="stat-label">石头</div>
+                        </div>
+                        <div class="stat paper">
+                            <div class="stat-value" id="statPaper">0</div>
+                            <div class="stat-label">布</div>
+                        </div>
+                        <div class="stat scissors">
+                            <div class="stat-value" id="statScissors">0</div>
+                            <div class="stat-label">剪刀</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dataset-selector">
+                        <select id="datasetSelect" onchange="onDatasetChange()">
+                            <option value="custom">自定义采集数据</option>
+                            <option value="local">本地预下载数据集</option>
+                        </select>
+                    </div>
+                    
+                    <div class="dataset-info" id="datasetInfo">加载中...</div>
+                    
+                    <div class="hotkeys">
+                        <span class="key rock">R</span>
+                        <span class="key paper">P</span>
+                        <span class="key scissors">S</span>
+                    </div>
+                    
+                    <button class="btn btn-new" onclick="newSession()">新建采集</button>
+                    <button class="btn btn-start" id="btnStartCollect" onclick="startCollect()">开始采集</button>
+                    <button class="btn btn-stop" id="btnStopCollect" onclick="stopCollect()" style="display:none">停止采集</button>
+                    <button class="btn btn-train" id="btnTrainCustom" onclick="startTrainCustom()">训练(自定义数据)</button>
+                    <button class="btn btn-train" id="btnTrainLocal" onclick="startTrainLocal()" style="background:#e94560">训练(本地数据集)</button>
+                </div>
+            </div>
+            
+            <div id="sessionsTab" style="display:none">
+                <div class="panel-section">
+                    <div class="section-title">选择已有 Session</div>
+                    <div class="sessions-list" id="sessionsList">
+                        <div style="color:#666;font-size:12px;text-align:center;padding:20px;">加载中...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="modelsTab" style="display:none">
+                <div class="panel-section">
+                    <div class="section-title">切换模型</div>
+                    <div class="model-list" id="modelList">
+                        <div style="color:#666;font-size:12px;text-align:center;padding:20px;">加载中...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="train-panel" id="trainPanel" style="display:none">
+                <div class="panel-section">
+                    <div class="section-title">训练进度</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="train-status" id="trainStatus">准备中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let collecting = false;
+        let sessionId = null;
+        let sessions = [];
+        let currentTab = 'collect';
+        let currentModel = null;
+        let models = [];
+        let datasetInfo = null;
+        let selectedDataset = 'custom';
+        let lastDetections = [];
+        let bboxRefreshInterval = 100; // default 100ms
+        let bboxCanvas = null;
+        let bboxCtx = null;
+
+        // Class colors for bounding boxes
+        const classColors = {
+            rock: '#e94560',    // red
+            paper: '#4ecca3',   // green
+            scissors: '#ffd369' // yellow
+        };
+
+        // Tab name mapping between URL param and internal name
+        const tabParamMap = {
+            'capture': 'collect',
+            'history': 'sessions',
+            'model': 'models'
+        };
+        const tabParamReverseMap = {
+            'collect': 'capture',
+            'sessions': 'history',
+            'models': 'model'
+        };
+
+        // Get tab from URL param on page load
+        function getTabFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+            if (tabParam && tabParamMap[tabParam]) {
+                return tabParamMap[tabParam];
+            }
+            // If no valid tab param, redirect to capture
+            const url = new URL(window.location);
+            url.searchParams.set('tab', 'capture');
+            window.history.replaceState({}, '', url);
+            return 'collect'; // default
+        }
+
+        // Update URL param when tab changes
+        function updateUrlParam(tab) {
+            const paramValue = tabParamReverseMap[tab];
+            if (paramValue) {
+                const url = new URL(window.location);
+                url.searchParams.set('tab', paramValue);
+                window.history.replaceState({}, '', url);
+            }
+        }
+
+        function initBBoxCanvas() {
+            bboxCanvas = document.getElementById('bboxCanvas');
+            if (bboxCanvas) {
+                bboxCtx = bboxCanvas.getContext('2d');
+                // Set canvas size to match container
+                const container = bboxCanvas.parentElement;
+                bboxCanvas.width = container.clientWidth;
+                bboxCanvas.height = container.clientHeight;
+            }
+        }
+
+        function getVideoDisplayInfo() {
+            const video = document.getElementById('video');
+            if (!video || video.naturalWidth === 0) return null;
+
+            // Get the actual displayed size of the video (accounting for object-fit: contain)
+            const containerWidth = bboxCanvas.width;
+            const containerHeight = bboxCanvas.height;
+            const videoRatio = video.naturalWidth / video.naturalHeight;
+            const containerRatio = containerWidth / containerHeight;
+
+            let displayWidth, displayHeight, offsetX, offsetY;
+
+            if (videoRatio > containerRatio) {
+                // Video is wider relative to container - fit to width
+                displayWidth = containerWidth;
+                displayHeight = containerWidth / videoRatio;
+                offsetX = 0;
+                offsetY = (containerHeight - displayHeight) / 2;
+            } else {
+                // Video is taller relative to container - fit to height
+                displayHeight = containerHeight;
+                displayWidth = containerHeight * videoRatio;
+                offsetX = (containerWidth - displayWidth) / 2;
+                offsetY = 0;
+            }
+
+            return {
+                displayWidth,
+                displayHeight,
+                offsetX,
+                offsetY,
+                naturalWidth: video.naturalWidth,
+                naturalHeight: video.naturalHeight
+            };
+        }
+
+        function drawBoundingBoxes() {
+            if (!bboxCtx || !bboxCanvas) return;
+
+            // Clear canvas
+            bboxCtx.clearRect(0, 0, bboxCanvas.width, bboxCanvas.height);
+
+            if (lastDetections.length === 0) return;
+
+            const videoInfo = getVideoDisplayInfo();
+            if (!videoInfo) return;
+
+            const { displayWidth, displayHeight, offsetX, offsetY, naturalWidth, naturalHeight } = videoInfo;
+
+            // Calculate scale factors based on actual displayed video size
+            const scaleX = displayWidth / naturalWidth;
+            const scaleY = displayHeight / naturalHeight;
+
+            lastDetections.forEach(det => {
+                const [x1, y1, x2, y2] = det.bbox;
+                const color = classColors[det.class] || '#fff';
+                const conf = (det.conf * 100).toFixed(1);
+                const label = `${det.class} ${conf}%`;
+
+                // Scale coordinates and add offset
+                const sx1 = x1 * scaleX + offsetX;
+                const sy1 = y1 * scaleY + offsetY;
+                const sx2 = x2 * scaleX + offsetX;
+                const sy2 = y2 * scaleY + offsetY;
+                const width = sx2 - sx1;
+                const height = sy2 - sy1;
+
+                // Draw box
+                bboxCtx.strokeStyle = color;
+                bboxCtx.lineWidth = 3;
+                bboxCtx.strokeRect(sx1, sy1, width, height);
+
+                // Draw label background
+                bboxCtx.fillStyle = color;
+                const textMetrics = bboxCtx.measureText(label);
+                const textWidth = textMetrics.width;
+                const textHeight = 16;
+                bboxCtx.fillRect(sx1, sy1 - textHeight - 4, textWidth + 8, textHeight + 4);
+
+                // Draw label text
+                bboxCtx.fillStyle = '#000';
+                bboxCtx.font = 'bold 12px Arial';
+                bboxCtx.fillText(label, sx1 + 4, sy1 - 4);
+            });
+        }
+
+        function startBBoxLoop() {
+            setInterval(() => {
+                drawBoundingBoxes();
+            }, bboxRefreshInterval);
+        }
+
+        function connectWS() {
+            if (ws) ws.close();
+            ws = new WebSocket(`ws://${location.host}/ws/stream`);
+            
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                document.getElementById('video').src = 'data:image/jpeg;base64,' + data.frame;
+
+                // Store detections for canvas drawing
+                lastDetections = data.detections;
+
+                const info = document.getElementById('detections');
+                if (data.detections.length > 0) {
+                    info.textContent = data.detections.map(d =>
+                        `${d.class} (${(d.conf*100).toFixed(1)}%)`
+                    ).join(', ');
+                } else {
+                    info.textContent = '未检测到手势';
+                }
+            };
+            
+            ws.onclose = () => {
+                setTimeout(connectWS, 1000);
+            };
+        }
+        
+        function switchTab(tab) {
+            currentTab = tab;
+            ['Collect', 'Sessions', 'Models'].forEach(t => {
+                document.getElementById('tab' + t).classList.toggle('active', t.toLowerCase() === tab);
+            });
+            document.getElementById('collectTab').style.display = tab === 'collect' ? 'block' : 'none';
+            document.getElementById('sessionsTab').style.display = tab === 'sessions' ? 'block' : 'none';
+            document.getElementById('modelsTab').style.display = tab === 'models' ? 'block' : 'none';
+
+            // Update URL param
+            updateUrlParam(tab);
+
+            if (tab === 'sessions') loadSessions();
+            if (tab === 'models') loadModels();
+        }
+        
+        async function loadSessions() {
+            const res = await fetch('/sessions');
+            const data = await res.json();
+            sessions = data.sessions || [];
+            renderSessions();
+        }
+        
+        async function loadModels() {
+            const res = await fetch('/models');
+            const data = await res.json();
+            models = data.models || [];
+            currentModel = data.current;
+            renderModels();
+        }
+        
+        function renderSessions() {
+            const list = document.getElementById('sessionsList');
+            if (sessions.length === 0) {
+                list.innerHTML = '<div style="color:#666;font-size:12px;text-align:center;padding:20px;">暂无 Session</div>';
+                return;
+            }
+            
+            list.innerHTML = sessions.map(s => `
+                <div class="session-card ${s.id === sessionId ? 'selected' : ''}" 
+                     onclick="selectSession('${s.id}')">
+                    <div class="session-header">
+                        <span class="session-time">${s.created}</span>
+                        <span class="session-total">${s.total} 张</span>
+                    </div>
+                    <div class="session-counts">
+                        <span class="rock">石:${s.stats.rock}</span>
+                        <span class="paper">布:${s.stats.paper}</span>
+                        <span class="scissors">剪:${s.stats.scissors}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderModels() {
+            const list = document.getElementById('modelList');
+            list.innerHTML = '';
+
+            models.forEach((m, idx) => {
+                const div = document.createElement('div');
+                div.className = 'model-item' + (m.path === currentModel ? ' selected' : '');
+                div.dataset.modelIndex = idx;
+
+                // Source tag
+                let sourceTagClass = '';
+                let sourceTagText = '';
+                if (m.source === 'pretrained') {
+                    sourceTagClass = 'pretrained';
+                    sourceTagText = '预训练';
+                } else if (m.source === 'default') {
+                    sourceTagClass = 'default';
+                    sourceTagText = '默认';
+                } else if (m.source === 'local') {
+                    sourceTagClass = 'local';
+                    sourceTagText = '本地训练';
+                } else {
+                    sourceTagClass = 'custom';
+                    sourceTagText = '自定义';
+                }
+                const sourceTagHtml = `<span class="model-source-tag ${sourceTagClass}">${sourceTagText}</span>`;
+
+                let metaHtml = '';
+                if (m.time || m.size_mb) {
+                    const timePart = m.time ? `<span class="model-time">🕐 ${m.time}</span>` : '';
+                    const sizePart = m.size_mb ? `<span class="model-size">📦 ${m.size_mb} MB</span>` : '';
+                    metaHtml = `<div class="model-meta">${timePart}${sizePart}</div>`;
+                }
+
+                // Build action buttons
+                let actionsHtml = '<div class="model-actions">';
+                actionsHtml += `<button class="model-action-btn open-folder" onclick="event.stopPropagation(); openModelFolder(${idx})" title="打开模型文件夹">📁 打开模型</button>`;
+                actionsHtml += `<button class="model-action-btn copy-path" onclick="event.stopPropagation(); copyModelPath(${idx})" title="复制模型文件夹路径">📋 复制模型路径</button>`;
+                if (m.dataset_path) {
+                    actionsHtml += `<button class="model-action-btn open-folder" onclick="event.stopPropagation(); openDatasetFolder(${idx})" title="打开数据集文件夹">📁 打开数据集</button>`;
+                    actionsHtml += `<button class="model-action-btn copy-path" onclick="event.stopPropagation(); copyDatasetPath(${idx})" title="复制数据集文件夹路径">📋 复制数据集路径</button>`;
+                }
+                // Add jump to dataset button for local training models
+                if (m.source === 'local' && m.dataset_path) {
+                    actionsHtml += `<button class="model-action-btn" style="background:#e94560;" onclick="event.stopPropagation(); openDatasetFolder(${idx})" title="跳转到数据集">📂 跳转数据集</button>`;
+                }
+                actionsHtml += '</div>';
+
+                div.innerHTML = `
+                    <div class="model-header">
+                        <span class="model-name">${m.name}</span>
+                        ${sourceTagHtml}
+                    </div>
+                    <div class="model-path">${m.path}</div>
+                    ${metaHtml}
+                    ${actionsHtml}
+                `;
+
+                div.addEventListener('click', () => switchModel(m.path));
+                list.appendChild(div);
+            });
+
+            const current = models.find(m => m.path === currentModel);
+            document.getElementById('currentModelName').textContent = current ? current.name : currentModel;
+        }
+
+        async function openModelFolder(idx) {
+            const m = models[idx];
+            if (m && m.folder_path) {
+                fetch('/folder/open', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({folder_path: m.folder_path})
+                });
+            }
+        }
+
+        async function copyModelPath(idx) {
+            const m = models[idx];
+            if (m && m.folder_path) {
+                fetch('/path/copy', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({path: m.folder_path})
+                });
+            }
+        }
+
+        async function openDatasetFolder(idx) {
+            const m = models[idx];
+            if (m && m.dataset_path) {
+                fetch('/folder/open', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({folder_path: m.dataset_path})
+                });
+            }
+        }
+
+        async function copyDatasetPath(idx) {
+            const m = models[idx];
+            if (m && m.dataset_path) {
+                fetch('/path/copy', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({path: m.dataset_path})
+                });
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #4ecca3;
+                color: #000;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 12px;
+                z-index: 1000;
+                animation: fadeInOut 2s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 2000);
+        }
+        
+        async function switchModel(path) {
+            const res = await fetch('/models/switch', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({model_path: path})
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                currentModel = data.model_path;
+                renderModels();
+            } else {
+                alert('切换失败: ' + data.message);
+            }
+        }
+        
+        async function selectSession(id) {
+            const res = await fetch(`/sessions/select?session_id=${id}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'selected') {
+                sessionId = data.session_id;
+                collecting = false;
+                updateStats(data.counts);
+                document.getElementById('currentSessionName').textContent = sessionId;
+                document.getElementById('btnStartCollect').style.display = 'inline-block';
+                document.getElementById('btnStopCollect').style.display = 'none';
+                switchTab('collect');
+                loadSessions();
+            }
+        }
+        
+        async function newSession() {
+            await startCollect();
+            loadSessions();
+        }
+        
+        async function startCollect() {
+            const res = await fetch('/collect/start', { method: 'POST' });
+            const data = await res.json();
+            collecting = true;
+            sessionId = data.session_id;
+            
+            document.getElementById('currentSessionName').textContent = sessionId;
+            document.getElementById('btnStartCollect').style.display = 'none';
+            document.getElementById('btnStopCollect').style.display = 'block';
+            updateStats(data.counts);
+        }
+        
+        async function stopCollect() {
+            const res = await fetch('/collect/stop', { method: 'POST' });
+            const data = await res.json();
+            collecting = false;
+            sessionId = data.session_id;
+            
+            document.getElementById('btnStartCollect').style.display = 'block';
+            document.getElementById('btnStopCollect').style.display = 'none';
+            updateStats(data.counts);
+            loadSessions();
+        }
+        
+        async function fetchCollectStatus() {
+            const res = await fetch('/collect/status');
+            const data = await res.json();
+            updateStats(data.stats);
+            if (data.session_id) {
+                sessionId = data.session_id;
+                document.getElementById('currentSessionName').textContent = sessionId;
+            }
+            if (data.active) {
+                collecting = true;
+                document.getElementById('btnStartCollect').style.display = 'none';
+                document.getElementById('btnStopCollect').style.display = 'block';
+            } else {
+                document.getElementById('btnStartCollect').style.display = 'block';
+                document.getElementById('btnStopCollect').style.display = 'none';
+            }
+        }
+        
+        async function loadDatasetInfo() {
+            const res = await fetch('/dataset');
+            const data = await res.json();
+            datasetInfo = data;
+            updateDatasetUI();
+        }
+        
+        function updateDatasetUI() {
+            const infoEl = document.getElementById('datasetInfo');
+            if (datasetInfo && datasetInfo.available) {
+                infoEl.innerHTML = `<span class="available">✓ 本地数据集可用</span><br>` +
+                    `训练集: ${datasetInfo.train_images} 张 | 验证集: ${datasetInfo.valid_images} 张<br>` +
+                    `<small>${datasetInfo.path}</small>`;
+                document.getElementById('btnTrainLocal').disabled = false;
+            } else {
+                infoEl.innerHTML = `<span class="unavailable">✗ 本地数据集未找到</span><br>` +
+                    `请确保 data.yaml 存在于数据集目录`;
+                document.getElementById('btnTrainLocal').disabled = true;
+            }
+        }
+        
+        function onDatasetChange() {
+            selectedDataset = document.getElementById('datasetSelect').value;
+        }
+        
+        async function startTrainCustom() {
+            if (!sessionId) {
+                alert('请先选择或新建一个 Session!');
+                return;
+            }
+            
+            document.getElementById('trainPanel').style.display = 'block';
+            fetchTrainStatus();
+            
+            await fetch(`/train/start?session_id=${sessionId}&epochs=50`, { method: 'POST' });
+        }
+        
+        async function startTrainLocal() {
+            if (!datasetInfo || !datasetInfo.available) {
+                alert('本地数据集不可用!');
+                return;
+            }
+            
+            document.getElementById('trainPanel').style.display = 'block';
+            document.getElementById('trainStatus').textContent = '准备使用本地数据集训练...';
+            fetchTrainStatus();
+            
+            await fetch('/train/local?epochs=50', { method: 'POST' });
+        }
+        
+        function updateStats(counts) {
+            document.getElementById('statRock').textContent = counts.rock || 0;
+            document.getElementById('statPaper').textContent = counts.paper || 0;
+            document.getElementById('statScissors').textContent = counts.scissors || 0;
+        }
+        
+        async function takeSnapshot(gesture) {
+            if (!collecting) return;
+            const res = await fetch('/collect/snapshot', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({gesture})
+            });
+            const data = await res.json();
+            if (data.status === 'saved') {
+                updateStats(data.counts);
+                flashKey(gesture);
+            }
+        }
+        
+        function flashKey(gesture) {
+            const key = document.querySelector(`.key.${gesture}`);
+            key.style.transform = 'scale(1.3)';
+            setTimeout(() => key.style.transform = '', 200);
+        }
+        
+        async function fetchTrainStatus() {
+            const res = await fetch('/train/status');
+            const data = await res.json();
+            
+            document.getElementById('progressFill').style.width = data.progress + '%';
+            document.getElementById('trainStatus').textContent = data.message;
+            
+            if (data.active) {
+                setTimeout(fetchTrainStatus, 2000);
+            } else if (data.message.includes('Done')) {
+                setTimeout(() => {
+                    if (confirm('训练完成! 是否切换到新模型?')) {
+                        loadModels();
+                    }
+                }, 1000);
+            }
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (!collecting) return;
+            const key = e.key.toLowerCase();
+            if (key === 'r') takeSnapshot('rock');
+            else if (key === 'p') takeSnapshot('paper');
+            else if (key === 's') takeSnapshot('scissors');
+            else if (key === 'q') stopCollect();
+        });
+        
+        fetchCollectStatus();
+        loadModels();
+        loadDatasetInfo();
+        connectWS();
+
+        // Initialize bounding box canvas
+        initBBoxCanvas();
+        startBBoxLoop();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            initBBoxCanvas();
+        });
+
+        // Initialize tab from URL param
+        const initialTab = getTabFromUrl();
+        switchTab(initialTab);
+    </script>
+</body>
+</html>

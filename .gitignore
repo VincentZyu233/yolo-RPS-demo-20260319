@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual env
+venv/
+.venv/
+env/
+.env/
+
+# Config (contains user-specific settings)
+config.yaml
+config.json
+
+# Model weights (large files)
+models/*.pt
+models/*.pth
+models/*.onnx
+self-train/
+*.pt
+*.pth
+*.onnx
+
+# Data
+data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-*
+
+# Cache
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+__pycache__/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local development
+*.local
+.env.local
