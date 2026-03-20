@@ -45,6 +45,13 @@
 - Python 3.12+
 - CUDA 11.8+（如需GPU训练）
 
+<details>
+<summary>🖥️ 开发环境参考（点击展开）</summary>
+
+![开发环境](doc/my-device-RTX3060-fastfetch-nvidia-smi.png)
+
+</details>
+
 ## 快速开始
 
 ### 1. 克隆项目
