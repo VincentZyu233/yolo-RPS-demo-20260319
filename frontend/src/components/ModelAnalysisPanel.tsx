@@ -153,10 +153,10 @@ async function createZip(
 	// 合并所有部分
 	const totalLength = zipParts.reduce((sum, part) => sum + part.length, 0);
 	const result = new Uint8Array(totalLength);
-	let pos = 0;
+	let position = 0;
 	for (const part of zipParts) {
-		result.set(part, pos);
-		pos += part.length;
+		result.set(part, position);
+		position += part.length;
 	}
 
 	return new Blob([result], { type: "application/zip" });
@@ -340,6 +340,8 @@ interface ZoomableImageProps {
 	src: string;
 	alt: string;
 	title: string;
+	lib?: string;
+	chartKey?: string;
 }
 
 // 指标说明
@@ -563,32 +565,29 @@ function ZoomableImage({
 
 export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 	const [analysis, setAnalysis] = useState<ModelAnalysis | null>(null);
-	const [loading, setLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const loadAnalysis = useCallback(async () => {
-		if (!selectedModel?.folder_path) {
-			setAnalysis(null);
-			return;
-		}
+	const fetchModelAnalysis = useCallback(async () => {
+		if (!selectedModel) return;
 
-		setLoading(true);
+		setIsLoading(true);
 		setError(null);
 
 		try {
-			const data = await api.getModelAnalysis(selectedModel.path);
-			setAnalysis(data);
+			const response = await api.getModelAnalysis(selectedModel.path);
+			setAnalysis(response);
 		} catch (err) {
-			setError("加载模型分析数据失败");
-			console.error(err);
+			console.error("Failed to fetch model analysis:", err);
+			setError("获取模型分析数据失败");
 		} finally {
-			setLoading(false);
+			setIsLoading(false);
 		}
 	}, [selectedModel]);
 
 	useEffect(() => {
-		loadAnalysis();
-	}, [loadAnalysis]);
+		fetchModelAnalysis();
+	}, [fetchModelAnalysis]);
 
 	const downloadImage = async (elementId: string, filename: string) => {
 		const element = document.getElementById(elementId);
@@ -609,7 +608,7 @@ export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 	const downloadAllImagesAsZip = async () => {
 		if (!analysis) return;
 
-		const timeStr = formatDateTime(selectedModel?.time);
+		const timeStr = formatDateTime();
 		const modelName = analysis.model_name;
 		const zipFiles: { name: string; data: string; isBase64?: boolean }[] = [];
 
@@ -746,7 +745,7 @@ export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 		);
 	}
 
-	if (loading) {
+	if (isLoading) {
 		return (
 			<div className="loading-spinner">
 				<div>加载中...</div>
@@ -799,7 +798,7 @@ export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 						onClick={() =>
 							downloadImage(
 								"analysis-content",
-								`综合报告_${analysis.model_name}_${formatDateTime(selectedModel?.time)}.png`,
+								`综合报告_${analysis.model_name}_${formatDateTime()}.png`,
 							)
 						}
 					>
@@ -825,7 +824,7 @@ export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 								title={`${METRIC_DESCRIPTIONS.mAP50.name}: ${METRIC_DESCRIPTIONS.mAP50.desc}`}
 							>
 								<div className="metric-value">
-									{(lastMetrics.mAP50 * 100).toFixed(1)}%
+									{((lastMetrics.mAP50 || 0) * 100).toFixed(1)}%
 								</div>
 								<div className="metric-label">mAP@50</div>
 								<div className="metric-tooltip">
@@ -849,7 +848,7 @@ export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 								title={`${METRIC_DESCRIPTIONS.mAP50_95.name}: ${METRIC_DESCRIPTIONS.mAP50_95.desc}`}
 							>
 								<div className="metric-value">
-									{(lastMetrics.mAP50_95 * 100).toFixed(1)}%
+									{((lastMetrics.mAP50_95 || 0) * 100).toFixed(1)}%
 								</div>
 								<div className="metric-label">mAP@50-95</div>
 								<div className="metric-tooltip">
@@ -873,7 +872,7 @@ export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 								title={`${METRIC_DESCRIPTIONS.precision.name}: ${METRIC_DESCRIPTIONS.precision.desc}`}
 							>
 								<div className="metric-value">
-									{(lastMetrics.precision * 100).toFixed(1)}%
+									{((lastMetrics.precision || 0) * 100).toFixed(1)}%
 								</div>
 								<div className="metric-label">Precision</div>
 								<div className="metric-tooltip">
@@ -897,7 +896,7 @@ export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 								title={`${METRIC_DESCRIPTIONS.recall.name}: ${METRIC_DESCRIPTIONS.recall.desc}`}
 							>
 								<div className="metric-value">
-									{(lastMetrics.recall * 100).toFixed(1)}%
+									{((lastMetrics.recall || 0) * 100).toFixed(1)}%
 								</div>
 								<div className="metric-label">Recall</div>
 								<div className="metric-tooltip">

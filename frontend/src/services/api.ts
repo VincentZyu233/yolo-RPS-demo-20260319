@@ -117,6 +117,9 @@ export const api = {
 		const res = await fetch(
 			`${API_BASE}/models/analysis?model_path=${encodeURIComponent(modelPath)}`,
 		);
+		if (!res.ok) {
+			throw new Error(`API error: ${res.status} ${res.statusText}`);
+		}
 		return res.json();
 	},
 };
