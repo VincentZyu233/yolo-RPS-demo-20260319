@@ -9,7 +9,7 @@ port: 60319               # 🔌 监听端口
 # ============================================
 capture_mode: "camera"    # 🎬 采集模式: "camera" 或 "window"
 camera_index: 0           # 📷 摄像头索引 (capture_mode=camera时使用)
-window_hwnd: null         # 🪟 窗口句柄   (capture_mode=window时使用)
+window_hwnd: null         # 🪟 窗口句柄 (capture_mode=window时使用，Windows上可用 test/list_windows.py 获取)
 
 # ============================================
 # 🤖 模型配置

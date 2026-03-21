@@ -56,3 +56,6 @@ desktop.ini
 # Local development
 *.local
 .env.local
+
+# Temporary files
+tmp/

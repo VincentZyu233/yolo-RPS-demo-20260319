@@ -1,174 +1,201 @@
-![yolo-RPS-demo-20260319](https://socialify.git.ci/VincentZyu233/yolo-RPS-demo-20260319/image?description=1&font=Source+Code+Pro&forks=1&issues=1&language=1&logo=https%3A%2F%2Fimg.icons8.com%2F%3Fsize%3D100%26id%3DOsYb6orOaOVV%26format%3Dpng%26color%3D000000%E2%80%8B&name=1&owner=1&pulls=1&stargazers=1&theme=Auto)
-
 # YOLO Rock-Paper-Scissors Demo
+
+![yolo-RPS-demo-20260319](https://socialify.git.ci/VincentZyu233/yolo-RPS-demo-20260319/image?description=1&font=Source+Code+Pro&forks=1&issues=1&language=1&logo=https%3A%2F%2Fimg.icons8.com%2F%3Fsize%3D100%26id%3DOsYb6orOaOVV%26format%3Dpng%26color%3D000000%E2%80%8B&name=1&owner=1&pulls=1&stargazers=1&theme=Auto)
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/VincentZyuApps/yolo-RPS-fastapi-demo-20260319)
 [![Gitee](https://img.shields.io/badge/Gitee-C71D23?style=for-the-badge&logo=gitee&logoColor=white)](https://gitee.com/vincent-zyu/yolo-RPS-fastapi-demo-20260319)
 
 基于 YOLO + FastAPI 的石头剪刀布实时识别演示项目，支持摄像头采集、模型训练和实时检测。
 
-| 目标检测框架 | [![YOLO](https://img.shields.io/badge/Ultralytics-YOLO11-00FFFF?style=flat-square)](https://github.com/ultralytics/ultralytics) |
-|:---|:---|
-| 深度学习框架 | [![PyTorch](https://img.shields.io/badge/PyTorch-2.7+cu118-EE4C2C?style=flat-square)](https://pytorch.org/) |
-| Web 后端框架 | [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=flat-square)](https://fastapi.tiangolo.com/) |
-| 图像处理库 | [![OpenCV](https://img.shields.io/badge/OpenCV-4.9-5C3EE8?style=flat-square)](https://opencv.org/) |
-| 数值计算库 | [![NumPy](https://img.shields.io/badge/NumPy-1.26-013243?style=flat-square)](https://numpy.org/) |
-| ASGI 服务器 | [![Uvicorn](https://img.shields.io/badge/Uvicorn-0.27-333333?style=flat-square)](https://www.uvicorn.org/) |
-| 数据验证库 | [![Pydantic](https://img.shields.io/badge/Pydantic-2.12-E92063?style=flat-square)](https://docs.pydantic.dev/) |
-| 图像处理库 | [![Pillow](https://img.shields.io/badge/Pillow-12.1-9CF?style=flat-square)](https://python-pillow.org/) |
-| 实时通信 | [![WebSockets](https://img.shields.io/badge/WebSockets-12.0-333333?style=flat-square)](https://github.com/python-websockets/websockets) |
-| 模板引擎 | [![Jinja2](https://img.shields.io/badge/Jinja2-3.1-B41717?style=flat-square)](https://jinja.palletsprojects.com/) |
-| HTTP 请求库 | [![Requests](https://img.shields.io/badge/Requests-2.32-CF4647?style=flat-square)](https://docs.python-requests.org/) |
-| 数据可视化 | [![Matplotlib](https://img.shields.io/badge/Matplotlib-3.10-11557c?style=flat-square)](https://matplotlib.org/) |
-| 科学计算库 | [![SciPy](https://img.shields.io/badge/SciPy-1.17-8CAAE6?style=flat-square)](https://scipy.org/) |
-| 符号计算库 | [![SymPy](https://img.shields.io/badge/SymPy-1.14-3B5526?style=flat-square)](https://www.sympy.org/) |
-| 数据分析库 | [![Pandas](https://img.shields.io/badge/Pandas-3.0-150458?style=flat-square)](https://pandas.pydata.org/) |
-| 进度条库 | [![tqdm](https://img.shields.io/badge/tqdm-4.67-FFC107?style=flat-square)](https://github.com/tqdm/tqdm) |
-| 环境变量管理 | [![python-dotenv](https://img.shields.io/badge/python--dotenv-1.2-222222?style=flat-square)](https://github.com/theskumar/python-dotenv) |
-| 窗口捕获工具 | [![MSS](https://img.shields.io/badge/MSS-9.0-333333?style=flat-square)](https://github.com/BoboTiG/python-mss) |
-| 文件上传解析 | [![python-multipart](https://img.shields.io/badge/python--multipart-0.0.6-3776AB?style=flat-square)](https://github.com/Kludex/python-multipart) |
-| 异步网络库 | [![AnyIO](https://img.shields.io/badge/AnyIO-4.12-4B8BBE?style=flat-square)](https://anyio.readthedocs.io/) |
-
 ![Preview](doc/preview.png)
 
 ## 功能特性
 
-- 实时手势检测（石头、剪刀、布）
-- 支持摄像头和窗口捕获两种模式
-- 数据采集与标注
-- 本地模型训练
-- Web UI 界面
-- 检测框实时显示
+- 🎯 实时手势检测（石头、剪刀、布）
+- 📹 支持摄像头和窗口捕获两种模式
+- 📊 数据采集与自动标注
+- 🤖 本地模型训练
+- 📈 模型性能分析可视化
+- 🌐 Web UI 界面
+- 🔲 检测框实时显示
 
-## 环境要求
+## 技术栈
 
-- Python 3.12+
-- CUDA 11.8+（如需GPU训练）
+### 后端
 
-<details>
-<summary>🖥️ 开发环境参考（点击展开）</summary>
+| 技术 | 版本 | 说明 |
+|:---|:---|:---|
+| [![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org/) | 3.12+ | 编程语言 |
+| [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/) | 0.109 | Web 框架 |
+| [![YOLO](https://img.shields.io/badge/Ultralytics-YOLO11-00FFFF?style=flat-square)](https://github.com/ultralytics/ultralytics) | 8.4.23 | 目标检测框架 |
+| [![PyTorch](https://img.shields.io/badge/PyTorch-2.7+cu118-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)](https://pytorch.org/) | 2.7+cu118 | 深度学习框架 |
+| [![OpenCV](https://img.shields.io/badge/OpenCV-4.9-5C3EE8?style=flat-square&logo=opencv&logoColor=white)](https://opencv.org/) | 4.9 | 图像处理库 |
+| [![Uvicorn](https://img.shields.io/badge/Uvicorn-0.27-333333?style=flat-square)](https://www.uvicorn.org/) | 0.27 | ASGI 服务器 |
+| [![WebSockets](https://img.shields.io/badge/WebSockets-12.0-333333?style=flat-square)](https://github.com/python-websockets/websockets) | 12.0 | 实时通信 |
+| [![Pydantic](https://img.shields.io/badge/Pydantic-2.12-E92063?style=flat-square)](https://docs.pydantic.dev/) | 2.12 | 数据验证 |
+| [![NumPy](https://img.shields.io/badge/NumPy-1.26-013243?style=flat-square&logo=numpy&logoColor=white)](https://numpy.org/) | 1.26 | 数值计算 |
+| [![Pillow](https://img.shields.io/badge/Pillow-12.1-9CF?style=flat-square)](https://python-pillow.org/) | 12.1 | 图像处理 |
 
-![开发环境](doc/my-device-RTX3060-fastfetch-nvidia-smi.png)
+### 前端
 
-</details>
+| 技术 | 版本 | 说明 |
+|:---|:---|:---|
+| [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/) | 19.2.4 | UI 框架 |
+| [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) | 5.9 | 类型系统 |
+| [![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/) | 8.0 | 构建工具 |
+| [![Recharts](https://img.shields.io/badge/Recharts-3.8-22B5BF?style=flat-square)](https://recharts.org/) | 3.8 | 图表库 |
+| [![React Router](https://img.shields.io/badge/React_Router-7.13-CA4245?style=flat-square&logo=react-router&logoColor=white)](https://reactrouter.com/) | 7.13 | 路由管理 |
+| [![html-to-image](https://img.shields.io/badge/html--to--image-1.11-FF6B6B?style=flat-square)](https://github.com/bubkoo/html-to-image) | 1.11 | 图片导出 |
+| [![ESLint](https://img.shields.io/badge/ESLint-9.39-4B32C3?style=flat-square&logo=eslint&logoColor=white)](https://eslint.org/) | 9.39 | 代码检查 |
+| [![Babel](https://img.shields.io/badge/Babel-7.29-F9DC3E?style=flat-square&logo=babel&logoColor=black)](https://babeljs.io/) | 7.29 | 编译器 |
+| [![React Compiler](https://img.shields.io/badge/React_Compiler-1.0-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/learn/react-compiler) | 1.0 | 编译优化 |
 
 ## 快速开始
+
+### 环境要求
+
+- Python 3.12+
+- Node.js 18+
+- CUDA 11.8+（如需GPU训练）
 
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/your-username/yolo-rps-demo.git
-cd yolo-rps-demo
+git clone https://github.com/VincentZyuApps/yolo-RPS-fastapi-demo-20260319
+cd yolo-RPS-fastapi-demo-20260319
 ```
 
-### 2. 使用 uv 创建虚拟环境
-
-> 💡 推荐使用 [【uv】https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/) 管理 Python 环境
+### 2. 后端设置
 
 ```bash
+# 创建虚拟环境
 uv venv --python 3.12
-```
 
-> **可选** 激活虚拟环境（uv 可直接使用 `.venv` 中的 Python，无需手动激活）：
-> - Windows: `.venv\Scripts\activate`
-> - Linux/macOS: `source .venv/bin/activate`
-
-### 3. 安装依赖
-
-> **重要提示**: 如果需要使用 CUDA GPU 进行本地训练，PyTorch 必须从特定 URL 安装，不能直接 `pip install torch`！
-
-#### 方式一：有 CUDA GPU（推荐用于训练）
-
-```bash
-# 先安装 PyTorch with CUDA 11.8
+# 安装 PyTorch (CUDA 版本)
 uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
 
-# 再安装其他依赖
+# 安装其他依赖
 uv pip install -r requirements.txt
-```
 
-#### 方式二：仅 CPU（仅推理，不支持训练）
-
-```bash
-uv pip install -r requirements.txt
-```
-
-### 4. 配置
-
-复制配置文件模板：
-
-```bash
+# 复制配置文件
 cp config.example.yaml config.yaml
 ```
 
-> 📄 配置文件模板 [config.example.yaml](config.example.yaml)
-
-```yaml
-# 服务器配置
-host: "0.0.0.0"           # 监听地址，0.0.0.0 表示所有网卡
-port: 60319               # 监听端口
-
-# 视频采集配置
-capture_mode: "camera"    # 采集模式: "camera" 或 "window"
-camera_index: 0           # 摄像头索引 (capture_mode=camera时使用)
-window_hwnd: null         # 窗口句柄 (capture_mode=window时使用)
-
-# 模型配置
-model_source: "pretrained"  # 模型来源: "pretrained"(预训练) 或 "custom"(自定义训练)
-model_path: "models/yolo11-rps-detection.pt"  # 模型路径(相对或绝对路径)
-
-# 代理配置
-use_proxy: false         # 是否使用代理下载模型
-proxy_url: "http://192.168.31.233:7890"        # 代理地址
-
-# 目标检测模型：石头剪刀布识别 (版本 v11, 规格 yolov8n, 迭代 100 次)
-roboflow_dataset: models/rock-paper-scissors.v11-yolov8n-100epochs.yolov11
-
-# 检测框显示配置
-bbox_refresh_interval: 100  # 检测框刷新间隔，单位毫秒，默认100ms (10fps)
+### 3. 前端设置
+```bash
+cd frontend
+npm install
+cd ..
 ```
 
-### 5. 运行
+### 4. 启动服务
+
+#### 方式一：开发模式（推荐开发时使用）
+
+同时启动后端和前端开发服务器：
 
 ```bash
-python run.py
+cd frontend
+npm install   # 首次需要安装依赖
+npm run dev
 ```
 
-或使用 uvicorn：
+- 后端 API: http://localhost:60319
+- 前端页面: http://localhost:60320
+
+#### 方式二：生产模式（推荐部署时使用）
+
+先构建前端，然后只启动后端：
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 60319
+cd frontend
+npm install   # 首次需要安装依赖
+npm run build
+npm run start
 ```
 
-打开浏览器访问 http://localhost:60319
+- 统一访问: http://localhost:60319
+
+后端会自动检测静态文件是否存在，如果存在则直接提供前端页面，否则重定向到前端开发服务器。
 
 ## 项目结构
 
 ```
 yolo-rps-demo/
-├── app/
-│   ├── main.py          # FastAPI 主应用
-│   ├── static/
-│   │   └── index.html   # Web UI
-│   ├── camera/          # 摄像头/窗口捕获
-│   ├── detection/       # YOLO 检测
-│   ├── collect/         # 数据采集与训练
-│   └── game/            # 游戏逻辑
-├── models/              # 模型文件目录
-├── self-train/          # 本地训练输出
-├── data/                # 采集的数据集
-├── config.yaml          # 配置文件
-├── requirements.txt     # 依赖列表
-└── run.py               # 启动脚本
+├── app/                    # 后端应用
+│   ├── camera/            # 摄像头/窗口捕获
+│   ├── collect/           # 数据采集与训练
+│   ├── detection/         # YOLO 检测
+│   └── main.py            # FastAPI 入口
+├── frontend/              # React 前端
+│   ├── src/
+│   │   ├── components/    # 组件
+│   │   ├── hooks/         # 自定义 Hooks
+│   │   ├── services/      # API 服务
+│   │   └── styles/        # 样式
+│   └── package.json
+├── models/                # 模型文件
+├── self-train/            # 训练数据与结果
+│   ├── sessions/          # 采集会话
+│   └── models/            # 训练好的模型
+├── test/                  # 测试脚本
+├── config.example.yaml    # 配置模板
+├── requirements.txt       # Python 依赖
+└── run.py                 # 启动脚本
 ```
 
-## 使用说明
+## 配置说明
 
-### Web UI 标签页
+编辑 `config.yaml`：
 
-- **采集**: 采集手势数据用于训练
-- **历史**: 查看历史采集会话
-- **模型**: 切换和管理模型
+```yaml
+# ============================================
+# 🖥️  服务器配置
+# ============================================
+host: "0.0.0.0"           # 🌐 监听地址，0.0.0.0 表示所有网卡
+port: 60319               # 🔌 监听端口
+
+# ============================================
+# 📹 视频采集配置
+# ============================================
+capture_mode: "camera"    # 🎬 采集模式: "camera" 或 "window"
+camera_index: 0           # 📷 摄像头索引 (capture_mode=camera时使用)
+window_hwnd: null         # 🪟 窗口句柄 (capture_mode=window时使用，Windows上可用 test/list_windows.py 获取)
+
+# ============================================
+# 🤖 模型配置
+# ============================================
+model_source: "pretrained"                      # 📦 模型来源: "pretrained"(预训练) 或 "custom"(自定义训练)
+model_path: "models/yolo11-rps-detection.pt"   # 📁 模型路径(相对或绝对路径)
+
+# ============================================
+# 🌍 代理配置
+# ============================================
+use_proxy: false              # 🔀 是否使用代理下载模型
+proxy_url: "http://127.0.0.1:7890"  # 🌐 代理地址
+
+# ============================================
+# 📚 数据集配置
+# ============================================
+# 🎯 目标检测模型：石头剪刀布识别
+roboflow_dataset: models/rock-paper-scissors.v11-yolov8n-100epochs.yolov11
+
+# ============================================
+# 🎨 检测框显示配置
+# ============================================
+bbox_refresh_interval: 100  # ⏱️ 检测框刷新间隔，单位毫秒，默认100ms (10fps)
+```
+
+## Web UI 使用说明
+
+### 标签页
+
+| 标签 | 功能 |
+|:---|:---|
+| **采集** | 采集手势数据用于训练 |
+| **历史** | 查看历史采集会话 |
+| **模型** | 切换和管理模型 |
+| **分析** | 查看模型训练结果和性能指标 |
 
 ### 快捷键
 
@@ -178,9 +205,95 @@ yolo-rps-demo/
 - `S` - 采集剪刀
 - `Q` - 停止采集
 
-### URL 参数
+## 代码检查
 
-支持通过 URL 参数直接跳转到指定标签页：
-- `?tab=capture` - 采集页
-- `?tab=history` - 历史页
-- `?tab=model` - 模型页
+### Python (Ruff)
+
+```bash
+# 检查代码
+uv tool run ruff check .
+
+# 自动修复
+uv tool run ruff check . --fix
+```
+
+### 前端 (Biome)
+
+```bash
+cd frontend
+npx @biomejs/biome check ./src
+```
+
+## 开发环境参考
+
+- OS: Windows 11 / WSL2 Ubuntu 22.04
+- GPU: NVIDIA RTX 3060 12GB
+- Python: 3.12
+- Node.js: 22.17.0
+
+![开发环境](doc/my-device-RTX3060-fastfetch-nvidia-smi.png)
+
+### 训练报告示例
+
+<table>
+  <tr>
+    <th align="center" colspan="2">📊 模型性能指标</th>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <img src="doc/report/01_模型性能指标.png" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <th align="center" width="50%">📈 训练结果</th>
+    <th align="center" width="50%">🔀 混淆矩阵</th>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="doc/report/02_训练结果.png" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <img src="doc/report/03_混淆矩阵.png" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <th align="center" width="50%">📊 归一化混淆矩阵</th>
+    <th align="center" width="50%">📉 Precision-Recall 曲线</th>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="doc/report/04_归一化混淆矩阵.png" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <img src="doc/report/05_Precision-Recall曲线.png" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <th align="center" colspan="2">📈 训练曲线</th>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <img src="doc/report/06_训练曲线.png" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <th align="center" width="50%">🖼️ 训练批次示例</th>
+    <th align="center" width="50%">🆚 验证批次对比</th>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="doc/report/07_训练批次示例.png" width="100%">
+    </td>
+    <td align="center" width="50%">
+      <img src="doc/report/08_验证批次对比.png" width="100%">
+    </td>
+  </tr>
+  <tr>
+    <th align="center" colspan="2">⚙️ 训练参数</th>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <img src="doc/report/09_训练参数.png" width="100%">
+    </td>
+  </tr>
+</table>

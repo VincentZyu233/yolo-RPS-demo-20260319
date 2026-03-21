@@ -2,6 +2,11 @@
 """GPU 检测脚本"""
 
 import sys
+import os
+
+# 创建tmp文件夹
+tmp_dir = "../tmp"
+os.makedirs(tmp_dir, exist_ok=True)
 
 
 def test_gpu():
@@ -25,7 +30,7 @@ def test_gpu():
     if torch.cuda.is_available():
         print(f"CUDA 版本: {torch.version.cuda}")
         print(f"cuDNN 版本: {torch.backends.cudnn.version()}")
-        print(f"\nGPU 设备:")
+        print("\nGPU 设备:")
         for i in range(torch.cuda.device_count()):
             props = torch.cuda.get_device_properties(i)
             mem = props.total_memory / 1024**3
@@ -61,12 +66,26 @@ def test_yolo_gpu():
             return False
 
         print("\n运行 YOLO 推理测试...")
-        model = YOLO("yolov8n.pt")
-        results = model(
-            "https://ultralytics.com/images/bus.jpg", device=0, verbose=False
+        # 使用tmp文件夹存储模型
+        model_path = os.path.join(tmp_dir, "yolov8n.pt")
+        model = YOLO(model_path)
+        
+        # 下载图片到tmp文件夹
+        import requests
+        image_url = "https://ultralytics.com/images/bus.jpg"
+        image_path = os.path.join(tmp_dir, "bus.jpg")
+        
+        if not os.path.exists(image_path):
+            print("下载测试图片...")
+            response = requests.get(image_url)
+            with open(image_path, "wb") as f:
+                f.write(response.content)
+        
+        model(
+            image_path, device=0, verbose=False
         )
 
-        print(f"YOLO GPU 推理成功!")
+        print("YOLO GPU 推理成功!")
         return True
 
     except ImportError as e:

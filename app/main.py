@@ -1,5 +1,4 @@
 from fastapi import FastAPI, WebSocket
-from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import cv2
 import base64
@@ -47,8 +46,107 @@ def resolve_path(path_str: str) -> Path:
 
 
 def save_config():
+    """Save configuration while preserving comments and order."""
+    import re
+    
+    # Read the original file content
+    if CONFIG_PATH.exists():
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+            original_content = f.read()
+    else:
+        # If file doesn't exist, use example as template
+        example_path = ROOT_DIR / "config.example.yaml"
+        if example_path.exists():
+            with open(example_path, "r", encoding="utf-8") as f:
+                original_content = f.read()
+        else:
+            # Fallback to simple dump
+            with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                yaml.dump(config, f, allow_unicode=True, default_flow_style=False)
+            return
+    
+    # Parse the original content to preserve structure
+    lines = original_content.strip().split('\n')
+    result_lines = []
+    
+    # Create a mapping of key to value for easy lookup
+    config_dict = dict(config)
+    
+    # Process each line
+    i = 0
+    while i < len(lines):
+        line = lines[i].rstrip()
+        
+        # Skip empty lines
+        if not line:
+            result_lines.append(line)
+            i += 1
+            continue
+        
+        # Handle comments and sections
+        if line.startswith('#'):
+            result_lines.append(line)
+            i += 1
+            continue
+        
+        # Handle key-value pairs
+        match = re.match(r'^\s*([^#:]+):\s*(.*)$', line)
+        if match:
+            key = match.group(1).strip()
+            value = match.group(2).strip()
+            
+            # Check if this key is in our config
+            if key in config_dict:
+                # Get the value from our config
+                new_value = config_dict[key]
+                
+                # Format the value properly
+                if isinstance(new_value, bool):
+                    formatted_value = 'true' if new_value else 'false'
+                elif new_value is None:
+                    formatted_value = 'null'
+                else:
+                    formatted_value = str(new_value)
+                
+                # Preserve any trailing comment
+                comment_match = re.search(r'#.*$', line)
+                comment = comment_match.group(0) if comment_match else ''
+                
+                # Create the new line
+                indent = len(line) - len(line.lstrip())
+                new_line = f"{' ' * indent}{key}: {formatted_value}{comment}"
+                result_lines.append(new_line)
+                
+                # Remove this key from the dict so we know which ones are new
+                del config_dict[key]
+            else:
+                # Keep the original line
+                result_lines.append(line)
+            i += 1
+        else:
+            # Keep other lines as-is
+            result_lines.append(line)
+            i += 1
+    
+    # Add any new keys that weren't in the original
+    if config_dict:
+        # Add a blank line if not already present
+        if result_lines and result_lines[-1].strip():
+            result_lines.append('')
+        
+        # Add new keys
+        for key, value in config_dict.items():
+            if isinstance(value, bool):
+                formatted_value = 'true' if value else 'false'
+            elif value is None:
+                formatted_value = 'null'
+            else:
+                formatted_value = str(value)
+            result_lines.append(f"{key}: {formatted_value}")
+    
+    # Write the result back
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(config, f, allow_unicode=True, default_flow_style=False)
+        f.write('\n'.join(result_lines) + '\n')
 
 
 def _get_model_time(pt_file: Path) -> str:
@@ -220,7 +318,15 @@ def list_available_models():
 
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+# 检查静态文件目录是否存在
+static_dir = ROOT_DIR / "app" / "static"
+if static_dir.exists() and (static_dir / "index.html").exists():
+    # 生产模式：挂载静态文件
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+    static_files_available = True
+else:
+    static_files_available = False
 
 detector = None
 camera = None
@@ -262,8 +368,15 @@ async def shutdown():
 
 @app.get("/")
 async def index():
-    with open("app/static/index.html", encoding="utf-8") as f:
-        return HTMLResponse(f.read())
+    from fastapi.responses import FileResponse, RedirectResponse
+    
+    # 如果静态文件存在，直接返回 index.html（生产模式）
+    if static_files_available:
+        return FileResponse(str(static_dir / "index.html"))
+    
+    # 否则重定向到前端开发服务器（开发模式）
+    webui_port = config.get("webui_port", 60320)
+    return RedirectResponse(url=f"http://localhost:{webui_port}")
 
 
 @app.websocket("/ws/stream")
@@ -423,3 +536,96 @@ async def api_switch_model(req: SwitchModelRequest):
         save_config()
         return {"status": "success", "model_path": model_path}
     return {"status": "error", "message": f"Model not found: {model_path}"}
+
+
+@app.get("/models/analysis")
+async def api_model_analysis(model_path: str):
+    """Get analysis data for a trained model."""
+    import csv
+    
+    model_path = model_path.replace("\\", "/")
+    full_path = resolve_path(model_path)
+    
+    if not full_path.exists():
+        return {"error": "Model not found", "model_path": model_path, "model_name": ""}
+    
+    model_dir = full_path.parent if full_path.name in ("best.pt", "last.pt") else full_path
+    if model_dir.name == "weights":
+        model_dir = model_dir.parent
+    
+    result = {
+        "model_path": model_path,
+        "model_name": model_dir.name,
+    }
+    
+    def encode_image(img_path: Path) -> str | None:
+        if img_path.exists():
+            try:
+                with open(img_path, "rb") as f:
+                    return base64.b64encode(f.read()).decode()
+            except Exception:
+                return None
+        return None
+    
+    result["results_png"] = encode_image(model_dir / "results.png")
+    result["confusion_matrix"] = encode_image(model_dir / "confusion_matrix.png")
+    result["confusion_matrix_normalized"] = encode_image(model_dir / "confusion_matrix_normalized.png")
+    result["pr_curve"] = encode_image(model_dir / "BoxPR_curve.png")
+    result["f1_curve"] = encode_image(model_dir / "BoxF1_curve.png")
+    result["p_curve"] = encode_image(model_dir / "BoxP_curve.png")
+    result["r_curve"] = encode_image(model_dir / "BoxR_curve.png")
+    
+    train_batches = []
+    for i in range(3):
+        img = encode_image(model_dir / f"train_batch{i}.jpg")
+        if img:
+            train_batches.append(img)
+    result["train_batches"] = train_batches
+    
+    val_batches = []
+    for i in range(3):
+        labels = encode_image(model_dir / f"val_batch{i}_labels.jpg")
+        pred = encode_image(model_dir / f"val_batch{i}_pred.jpg")
+        if labels and pred:
+            val_batches.append({"labels": labels, "pred": pred})
+    result["val_batches"] = val_batches
+    
+    results_csv_path = model_dir / "results.csv"
+    if results_csv_path.exists():
+        try:
+            with open(results_csv_path, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                rows = list(reader)
+            
+            metrics = {
+                "epochs": [],
+                "train_loss": [],
+                "val_loss": [],
+                "precision": [],
+                "recall": [],
+                "mAP50": [],
+                "mAP50_95": [],
+            }
+            
+            for i, row in enumerate(rows):
+                metrics["epochs"].append(i + 1)
+                metrics["train_loss"].append(float(row.get("train/box_loss", 0) or 0) + float(row.get("train/cls_loss", 0) or 0) + float(row.get("train/dfl_loss", 0) or 0))
+                metrics["val_loss"].append(float(row.get("val/box_loss", 0) or 0) + float(row.get("val/cls_loss", 0) or 0) + float(row.get("val/dfl_loss", 0) or 0))
+                metrics["precision"].append(float(row.get("metrics/precision(B)", 0) or 0))
+                metrics["recall"].append(float(row.get("metrics/recall(B)", 0) or 0))
+                metrics["mAP50"].append(float(row.get("metrics/mAP50(B)", 0) or 0))
+                metrics["mAP50_95"].append(float(row.get("metrics/mAP50-95(B)", 0) or 0))
+            
+            result["metrics"] = metrics
+        except Exception:
+            result["metrics"] = None
+    
+    args_path = model_dir / "args.yaml"
+    if args_path.exists():
+        try:
+            with open(args_path, "r", encoding="utf-8") as f:
+                result["args"] = yaml.safe_load(f)
+        except Exception:
+            result["args"] = None
+    
+    return result

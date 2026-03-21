@@ -1,8 +1,8 @@
 import threading
 import time
 from pathlib import Path
-from dataclasses import dataclass, field
-from typing import Optional, Literal
+from dataclasses import dataclass
+from typing import Optional
 import yaml
 
 ROOT_DIR = Path(__file__).parent.parent.parent / "self-train"
@@ -135,7 +135,7 @@ def start_training(session_id: str, epochs: int = 50):
 
             model.add_callback("on_train_epoch_end", on_train_epoch_end)
 
-            results = model.train(
+            model.train(
                 data=str(yaml_path),
                 epochs=epochs,
                 imgsz=640,
@@ -217,7 +217,7 @@ def start_training_local(epochs: int = 50):
 
             model.add_callback("on_train_epoch_end", on_train_epoch_end)
 
-            results = model.train(
+            model.train(
                 data=str(yaml_path),
                 epochs=epochs,
                 imgsz=640,
