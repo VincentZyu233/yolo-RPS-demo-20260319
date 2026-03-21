@@ -1,11 +1,14 @@
-# YOLO Rock-Paper-Scissors Demo
+# YOLO Rock-Paper-Scissors Recognition Demo
+## reponame: `yolo-RPS-fastapi-demo-20260319`
 
-![yolo-RPS-demo-20260319](https://socialify.git.ci/VincentZyu233/yolo-RPS-demo-20260319/image?description=1&font=Source+Code+Pro&forks=1&issues=1&language=1&logo=https%3A%2F%2Fimg.icons8.com%2F%3Fsize%3D100%26id%3DOsYb6orOaOVV%26format%3Dpng%26color%3D000000%E2%80%8B&name=1&owner=1&pulls=1&stargazers=1&theme=Auto)
+> ✊✋✌️Rock-Paper-Scissors 简称 RPS
+
+![yolo-RPS-fastapi-demo-20260319](https://socialify.git.ci/VincentZyuApps/yolo-RPS-fastapi-demo-20260319/image?custom_description=%E2%9C%8A%E2%9C%8B%E2%9C%8C%EF%B8%8FRock-Paper-Scissors+%E7%AE%80%E7%A7%B0+RPS+%E3%80%82%E5%9F%BA%E4%BA%8E+Ultralytics+YOLOv11%E7%9A%84%E7%9F%B3%E5%A4%B4%E5%89%AA%E5%88%80%E5%B8%83%E6%89%8B%E5%8A%BF%E5%AE%9E%E6%97%B6%E6%A3%80%E6%B5%8B%EF%BC%8C%E6%94%AF%E6%8C%81%E6%91%84%E5%83%8F%E5%A4%B4%E9%87%87%E9%9B%86+or+%E7%AA%97%E5%8F%A3%E6%8D%95%E8%8E%B7%E3%80%82%E5%8F%AF%E4%BB%A5%E6%9C%AC%E5%9C%B0%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B%E3%80%82&custom_language=Python&description=1&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fimg.icons8.com%2F%3Fsize%3D100%26id%3DOsYb6orOaOVV%26format%3Dpng%26color%3D000000&name=1&owner=1&pulls=1&stargazers=1&theme=Auto)
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/VincentZyuApps/yolo-RPS-fastapi-demo-20260319)
 [![Gitee](https://img.shields.io/badge/Gitee-C71D23?style=for-the-badge&logo=gitee&logoColor=white)](https://gitee.com/vincent-zyu/yolo-RPS-fastapi-demo-20260319)
 
-基于 YOLO + FastAPI 的石头剪刀布实时识别演示项目，支持摄像头采集、模型训练和实时检测。
+基于 YOLOv11 + FastAPI + React 的石头剪刀布实时识别演示项目，支持摄像头采集、模型训练和实时检测。
 
 ![Preview](doc/preview.png)
 
