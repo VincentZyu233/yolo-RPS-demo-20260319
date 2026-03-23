@@ -71,4 +71,26 @@ export interface ModelAnalysis {
 		mAP50: number[];
 		mAP50_95: number[];
 	};
+	anchor_boxes?: {
+		sizes: number[][];
+		strides: number[];
+	};
+	feature_maps?: {
+		name: string;
+		size: string;
+		channels: number;
+	}[];
+	nms_params?: {
+		iou_threshold: number;
+		conf_threshold: number;
+	};
+	model_architecture?: {
+		backbone: string;
+		neck: string;
+		head: string;
+		layers: {
+			name: string;
+			size: string;
+		}[];
+	};
 }

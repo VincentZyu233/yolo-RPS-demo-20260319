@@ -1,5 +1,5 @@
 import { toPng } from "html-to-image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	CartesianGrid,
 	Legend,
@@ -476,6 +476,7 @@ function ZoomableImage({
 	const [isZoomed, setIsZoomed] = useState(false);
 	const [showTooltip, setShowTooltip] = useState(false);
 	const chartInfo = chartKey ? CHART_DESCRIPTIONS[chartKey] : null;
+	const containerRef = useRef<HTMLDivElement>(null);
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === "Enter" || e.key === " ") {
@@ -490,11 +491,35 @@ function ZoomableImage({
 		}
 	};
 
+	const handleContainerClick = (e: React.MouseEvent) => {
+		// 阻止事件冒泡，避免触发其他点击事件
+		e.stopPropagation();
+		setIsZoomed(true);
+	};
+
+	const handleModalClick = (e: React.MouseEvent) => {
+		// 阻止事件冒泡，避免触发其他点击事件
+		e.stopPropagation();
+		setIsZoomed(false);
+	};
+
+	const handleModalContentClick = (e: React.MouseEvent) => {
+		// 阻止事件冒泡，避免触发模态框的点击事件
+		e.stopPropagation();
+	};
+
+	const handleCloseModal = (e: React.MouseEvent) => {
+		// 阻止事件冒泡，避免触发其他点击事件
+		e.stopPropagation();
+		setIsZoomed(false);
+	};
+
 	return (
 		<>
 			<div
+				ref={containerRef}
 				className="zoomable-image-container"
-				onClick={() => setIsZoomed(true)}
+				onClick={handleContainerClick}
 				onKeyDown={handleKeyDown}
 				onMouseEnter={() => setShowTooltip(true)}
 				onMouseLeave={() => setShowTooltip(false)}
@@ -504,26 +529,115 @@ function ZoomableImage({
 				role="button"
 				aria-label="点击放大图片"
 				title="点击放大"
+				style={{
+					position: 'relative',
+					display: 'inline-block',
+					cursor: 'pointer',
+					zIndex: 10,
+					transition: 'transform 0.2s ease-in-out'
+				}}
+				onMouseOver={(e) => {
+					// 显示放大图标
+					const overlay = e.currentTarget.querySelector('.zoomable-image-overlay');
+					if (overlay) {
+						(overlay as HTMLElement).style.opacity = '1';
+					}
+				}}
+				onMouseOut={(e) => {
+					// 隐藏放大图标
+					const overlay = e.currentTarget.querySelector('.zoomable-image-overlay');
+					if (overlay) {
+						(overlay as HTMLElement).style.opacity = '0';
+					}
+				}}
 			>
-				<img src={src} alt={alt} />
-				<div className="zoomable-image-overlay">
-					<span className="zoomable-image-icon">🔍</span>
+				<img 
+					src={src} 
+					alt={alt}
+					style={{
+						maxWidth: '100%',
+						height: 'auto',
+						borderRadius: '4px',
+						transition: 'transform 0.2s ease-in-out'
+					}}
+				/>
+				<div className="zoomable-image-overlay" style={{
+					position: 'absolute',
+					top: 0,
+					left: 0,
+					width: '100%',
+					height: '100%',
+					backgroundColor: 'rgba(0, 0, 0, 0.3)',
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					opacity: 0,
+					transition: 'opacity 0.2s ease-in-out',
+					borderRadius: '4px',
+					zIndex: 1
+				}}>
+					<span className="zoomable-image-icon" style={{
+						fontSize: '32px',
+						color: '#fff',
+						textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
+					}}>🔍</span>
 				</div>
 				{showTooltip && chartInfo && (
-					<div className="chart-image-tooltip">
-						<div className="tooltip-header">{chartInfo.title}</div>
+					<div className="chart-image-tooltip" style={{
+						position: 'absolute',
+						top: '100%',
+						left: 0,
+						marginTop: '10px',
+						backgroundColor: '#2d2d2d',
+						color: '#fff',
+						padding: '15px',
+						borderRadius: '4px',
+						boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+						zIndex: 1000,
+						maxWidth: '300px',
+						pointerEvents: 'none',
+						transform: 'translateZ(0)',
+						willChange: 'transform'
+					}}>
+						<div className="tooltip-header" style={{
+							fontWeight: 'bold',
+							marginBottom: '10px',
+							fontSize: '14px'
+						}}>{chartInfo.title}</div>
 						<div className="tooltip-content">
-							<div className="tooltip-section">
-								<div className="tooltip-label">📊 图表说明</div>
-								<div className="tooltip-text">{chartInfo.desc}</div>
+							<div className="tooltip-section" style={{
+								marginBottom: '8px'
+							}}>
+								<div className="tooltip-label" style={{
+									fontSize: '12px',
+									color: '#ccc',
+									marginBottom: '4px'
+								}}>📊 图表说明</div>
+								<div className="tooltip-text" style={{
+									fontSize: '12px'
+								}}>{chartInfo.desc}</div>
+							</div>
+							<div className="tooltip-section" style={{
+								marginBottom: '8px'
+							}}>
+								<div className="tooltip-label" style={{
+									fontSize: '12px',
+									color: '#ccc',
+									marginBottom: '4px'
+								}}>📈 坐标轴含义</div>
+								<div className="tooltip-text" style={{
+									fontSize: '12px'
+								}}>{chartInfo.axes}</div>
 							</div>
 							<div className="tooltip-section">
-								<div className="tooltip-label">📈 坐标轴含义</div>
-								<div className="tooltip-text">{chartInfo.axes}</div>
-							</div>
-							<div className="tooltip-section">
-								<div className="tooltip-label">💡 解读方法</div>
-								<div className="tooltip-text">{chartInfo.interpretation}</div>
+								<div className="tooltip-label" style={{
+									fontSize: '12px',
+									color: '#ccc',
+									marginBottom: '4px'
+								}}>💡 解读方法</div>
+								<div className="tooltip-text" style={{
+									fontSize: '12px'
+								}}>{chartInfo.interpretation}</div>
 							</div>
 						</div>
 					</div>
@@ -532,30 +646,110 @@ function ZoomableImage({
 			{isZoomed && (
 				<div
 					className="image-modal"
-					onClick={() => setIsZoomed(false)}
+					onClick={handleModalClick}
 					onKeyDown={handleModalKeyDown}
 					tabIndex={-1}
 					role="dialog"
 					aria-modal="true"
 					aria-label={title}
+					style={{
+						position: 'fixed',
+						top: 0,
+						left: 0,
+						width: '100%',
+						height: '100%',
+						backgroundColor: 'rgba(0, 0, 0, 0.95)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						zIndex: 9999,
+						padding: '20px',
+						boxSizing: 'border-box',
+						backdropFilter: 'blur(5px)',
+						animation: 'fadeIn 0.3s ease-in-out'
+					}}
 				>
 					<div
 						className="image-modal-content"
-						onClick={(e) => e.stopPropagation()}
+						onClick={handleModalContentClick}
 						onKeyDown={(e) => e.stopPropagation()}
+						style={{
+							maxWidth: '95%',
+							maxHeight: '95%',
+							backgroundColor: '#1a1a1a',
+							borderRadius: '8px',
+							padding: '20px',
+							display: 'flex',
+							flexDirection: 'column',
+							boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+							animation: 'scaleIn 0.3s ease-in-out'
+						}}
 					>
-						<div className="image-modal-header">
-							<span>{title}</span>
-							{lib && <span className="chart-lib-badge matplotlib">{lib}</span>}
+						<div 
+							className="image-modal-header"
+							style={{
+								display: 'flex',
+								justifyContent: 'space-between',
+								alignItems: 'center',
+								marginBottom: '15px'
+							}}
+						>
+							<span style={{ color: '#fff', fontSize: '16px', fontWeight: 'bold' }}>{title}</span>
+							{lib && (
+								<span 
+									className="chart-lib-badge matplotlib"
+									style={{
+										backgroundColor: '#333',
+										color: '#fff',
+										padding: '4px 8px',
+										borderRadius: '4px',
+										fontSize: '12px',
+										margin: '0 10px'
+									}}
+								>
+									{lib}
+								</span>
+							)}
 							<button
 								type="button"
 								className="image-modal-close"
-								onClick={() => setIsZoomed(false)}
+								onClick={handleCloseModal}
+								style={{
+									background: 'none',
+									border: 'none',
+									color: '#fff',
+									fontSize: '24px',
+									cursor: 'pointer',
+									padding: '0',
+									width: '30px',
+									height: '30px',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									transition: 'transform 0.2s ease-in-out'
+								}}
+								onMouseOver={(e) => {
+									(e.currentTarget as HTMLElement).style.transform = 'rotate(90deg)';
+								}}
+								onMouseOut={(e) => {
+									(e.currentTarget as HTMLElement).style.transform = 'rotate(0deg)';
+								}}
 							>
 								✕
 							</button>
 						</div>
-						<img src={src} alt={alt} />
+						<div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto' }}>
+							<img 
+								src={src} 
+								alt={alt}
+								style={{
+									maxWidth: '100%',
+									maxHeight: 'calc(90vh - 100px)',
+									objectFit: 'contain',
+									transition: 'transform 0.3s ease-in-out'
+								}}
+							/>
+						</div>
 					</div>
 				</div>
 			)}
@@ -702,36 +896,84 @@ export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 			}
 
 			// 9. 训练参数
-			if (analysis.args) {
-				const argsElement = document.getElementById("training-args");
-				if (argsElement) {
-					const dataUrl = await toPng(argsElement);
+				if (analysis.args) {
+					const argsElement = document.getElementById("training-args");
+					if (argsElement) {
+						const dataUrl = await toPng(argsElement);
+						const base64Data = dataUrl.split(",")[1];
+						zipFiles.push({
+							name: "09_训练参数.png",
+							data: base64Data,
+							isBase64: true,
+						});
+					}
+				}
+
+				// 10. Anchor Box 信息
+				const anchorBoxesElement = document.getElementById("anchor-boxes-section");
+				if (anchorBoxesElement) {
+					const dataUrl = await toPng(anchorBoxesElement);
 					const base64Data = dataUrl.split(",")[1];
 					zipFiles.push({
-						name: "09_训练参数.png",
+						name: "10_Anchor Box 信息.png",
 						data: base64Data,
 						isBase64: true,
 					});
 				}
-			}
 
-			// 创建并下载 ZIP 文件
-			if (zipFiles.length > 0) {
-				const zipBlob = await createZip(zipFiles);
-				const url = URL.createObjectURL(zipBlob);
-				const link = document.createElement("a");
-				link.href = url;
-				link.download = `图片报告合集_${modelName}_${timeStr}.zip`;
-				document.body.appendChild(link);
-				link.click();
-				document.body.removeChild(link);
-				URL.revokeObjectURL(url);
+				// 11. 特征图尺寸变化
+				const featureMapsElement = document.getElementById("feature-maps-section");
+				if (featureMapsElement) {
+					const dataUrl = await toPng(featureMapsElement);
+					const base64Data = dataUrl.split(",")[1];
+					zipFiles.push({
+						name: "11_特征图尺寸变化.png",
+						data: base64Data,
+						isBase64: true,
+					});
+				}
+
+				// 12. NMS 参数
+				const nmsParamsElement = document.getElementById("nms-params-section");
+				if (nmsParamsElement) {
+					const dataUrl = await toPng(nmsParamsElement);
+					const base64Data = dataUrl.split(",")[1];
+					zipFiles.push({
+						name: "12_NMS 参数.png",
+						data: base64Data,
+						isBase64: true,
+					});
+				}
+
+				// 13. 模型架构
+				const modelArchitectureElement = document.getElementById("model-architecture-section");
+				if (modelArchitectureElement) {
+					const dataUrl = await toPng(modelArchitectureElement);
+					const base64Data = dataUrl.split(",")[1];
+					zipFiles.push({
+						name: "13_模型架构.png",
+						data: base64Data,
+						isBase64: true,
+					});
+				}
+
+				// 创建并下载 ZIP 文件
+				if (zipFiles.length > 0) {
+					const zipBlob = await createZip(zipFiles);
+					const url = URL.createObjectURL(zipBlob);
+					const link = document.createElement("a");
+					link.href = url;
+					link.download = `图片报告合集_${modelName}_${timeStr}.zip`;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+					URL.revokeObjectURL(url);
+				}
+			} catch (err) {
+				console.error("下载压缩包失败:", err);
+				alert("下载压缩包失败，请重试");
 			}
-		} catch (err) {
-			console.error("下载压缩包失败:", err);
-			alert("下载压缩包失败，请重试");
-		}
-	};
+		};
 
 	if (!selectedModel) {
 		return (
@@ -1112,6 +1354,99 @@ export function ModelAnalysisPanel({ selectedModel }: ModelAnalysisPanelProps) {
 						</div>
 					)}
 				</div>
+
+				{analysis.anchor_boxes && analysis.anchor_boxes.sizes && analysis.anchor_boxes.strides && (
+						<div id="anchor-boxes-section" className="analysis-card">
+							<div className="analysis-card-title">
+								Anchor Box 信息
+								<span className="chart-lib-badge custom">自定义</span>
+							</div>
+							<div className="analysis-card-content">
+								<div className="anchor-boxes-list">
+									{analysis.anchor_boxes.sizes.map((size, index) => (
+										<div key={index} className="anchor-box-item">
+											<div className="anchor-box-size">{size[0]}×{size[1]}</div>
+											<div className="anchor-box-stride">步长: {analysis.anchor_boxes.strides[Math.floor(index / 3)]}</div>
+										</div>
+									))}
+								</div>
+							</div>
+						</div>
+					)}
+
+				{analysis.feature_maps && (
+					<div id="feature-maps-section" className="analysis-card">
+						<div className="analysis-card-title">
+							特征图尺寸变化
+							<span className="chart-lib-badge custom">自定义</span>
+						</div>
+						<div className="analysis-card-content">
+							{analysis.feature_maps.map((fm, index) => (
+								<div key={index} className="feature-map-item">
+									<div className="feature-map-name">{fm.name}</div>
+									<div className="feature-map-size">尺寸: {fm.size}</div>
+									{fm.channels && <div className="feature-map-channels">通道数: {fm.channels}</div>}
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+
+				{analysis.nms_params && (
+					<div id="nms-params-section" className="analysis-card">
+						<div className="analysis-card-title">
+							NMS 参数
+							<span className="chart-lib-badge custom">自定义</span>
+						</div>
+						<div className="analysis-card-content">
+							<div className="nms-params-content">
+								<div className="nms-param-item">
+									<div className="nms-param-name">IoU 阈值</div>
+									<div className="nms-param-value">{analysis.nms_params.iou_threshold}</div>
+								</div>
+								<div className="nms-param-item">
+									<div className="nms-param-name">置信度阈值</div>
+									<div className="nms-param-value">{analysis.nms_params.conf_threshold}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{analysis.model_architecture && (
+					<div id="model-architecture-section" className="analysis-card">
+						<div className="analysis-card-title">
+							模型架构
+							<span className="chart-lib-badge custom">自定义</span>
+						</div>
+						<div className="analysis-card-content">
+							<div className="model-architecture-content">
+								<div className="architecture-overview">
+									<div className="architecture-item">
+										<div className="architecture-label">Backbone</div>
+										<div className="architecture-value">{analysis.model_architecture.backbone}</div>
+									</div>
+									<div className="architecture-item">
+										<div className="architecture-label">Neck</div>
+										<div className="architecture-value">{analysis.model_architecture.neck}</div>
+									</div>
+									<div className="architecture-item">
+										<div className="architecture-label">Head</div>
+										<div className="architecture-value">{analysis.model_architecture.head}</div>
+									</div>
+								</div>
+								<div className="architecture-layers">
+									{analysis.model_architecture.layers.map((layer, index) => (
+										<div key={index} className="architecture-layer">
+											<div className="layer-name">{layer.name}</div>
+											<div className="layer-size">{layer.size}</div>
+										</div>
+									))}
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);
